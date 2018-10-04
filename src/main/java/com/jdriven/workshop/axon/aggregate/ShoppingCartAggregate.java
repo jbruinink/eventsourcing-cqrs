@@ -11,16 +11,20 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.spring.stereotype.Aggregate;
 
 
+import com.jdriven.workshop.axon.command.AcceptShoppingCartCommand;
 import com.jdriven.workshop.axon.command.AddProductCommand;
 import com.jdriven.workshop.axon.command.CompleteCheckoutCommand;
 import com.jdriven.workshop.axon.command.CreateShoppingCartCommand;
+import com.jdriven.workshop.axon.command.RejectShoppingCartCommand;
 import com.jdriven.workshop.axon.command.RemoveProductCommand;
 import com.jdriven.workshop.axon.domain.CartValueTooLowException;
 import com.jdriven.workshop.axon.domain.ShoppingCartProduct;
 import com.jdriven.workshop.axon.event.CheckoutCompletedEvent;
 import com.jdriven.workshop.axon.event.ProductAddedEvent;
 import com.jdriven.workshop.axon.event.ProductRemovedEvent;
+import com.jdriven.workshop.axon.event.ShoppingCartAcceptedEvent;
 import com.jdriven.workshop.axon.event.ShoppingCartCreatedEvent;
+import com.jdriven.workshop.axon.event.ShoppingCartRejectedEvent;
 
 @Aggregate
 public class ShoppingCartAggregate {
@@ -61,6 +65,16 @@ public class ShoppingCartAggregate {
         apply(new CheckoutCompletedEvent(cmd.getCartId()));
     }
 
+    @CommandHandler
+    public void on(RejectShoppingCartCommand cmd) {
+        apply(new ShoppingCartRejectedEvent(cmd.getCartId(), cmd.getReason()));
+    }
+
+    @CommandHandler
+    public void on(AcceptShoppingCartCommand cmd) {
+        apply(new ShoppingCartAcceptedEvent(cmd.getCartId()));
+    }
+
     @EventSourcingHandler
     public void on(ShoppingCartCreatedEvent event) {
         this.id = event.getId();
@@ -89,5 +103,15 @@ public class ShoppingCartAggregate {
     @EventSourcingHandler
     public void on(CheckoutCompletedEvent event) {
         products.clear();
+    }
+
+    @EventSourcingHandler
+    public void on(ShoppingCartRejectedEvent evt) {
+        // Do something
+    }
+
+    @EventSourcingHandler
+    public void on(ShoppingCartAcceptedEvent evt) {
+        // Do something
     }
 }

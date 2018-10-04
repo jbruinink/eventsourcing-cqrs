@@ -1,22 +1,24 @@
 package com.jdriven.workshop.axon.projection;
 
-import com.jdriven.workshop.axon.event.CheckoutCompletedEvent;
-import com.jdriven.workshop.axon.event.ProductAddedEvent;
-import com.jdriven.workshop.axon.event.ProductRemovedEvent;
-import com.jdriven.workshop.axon.query.ShoppingCartQuery;
-import com.jdriven.workshop.axon.query.ShoppingCartResponse;
+import java.math.BigDecimal;
+import java.util.Iterator;
+
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.util.Iterator;
 
+import com.jdriven.workshop.axon.event.CheckoutCompletedEvent;
+import com.jdriven.workshop.axon.event.ProductAddedEvent;
+import com.jdriven.workshop.axon.event.ProductRemovedEvent;
 import com.jdriven.workshop.axon.event.ShoppingCartCreatedEvent;
+import com.jdriven.workshop.axon.query.ShoppingCartQuery;
+import com.jdriven.workshop.axon.query.ShoppingCartResponse;
 
 @Component
 public class ShoppingCartProjection {
 
+    private static final int PRICE_DECIMALS = 2;
     private final ShoppingCartRepository repository;
 
     public ShoppingCartProjection(final ShoppingCartRepository repository) {
@@ -38,8 +40,7 @@ public class ShoppingCartProjection {
     }
 
     private void updateCart(final ShoppingCart shoppingCart, ProductAddedEvent event) {
-        BigDecimal price = BigDecimal.valueOf(event.getPriceInCents()).movePointLeft(2);
-
+        BigDecimal price = BigDecimal.valueOf(event.getPriceInCents(), PRICE_DECIMALS);
         for (ShoppingCartItem item : shoppingCart.getItems()) {
             if (item.getProductId().equals(event.getProduct().getId())) {
                 item.setQuantity(item.getQuantity() + event.getQuantity());

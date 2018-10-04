@@ -5,6 +5,9 @@ import com.jdriven.workshop.axon.event.CheckoutCompletedEvent;
 import com.jdriven.workshop.axon.event.ProductAddedEvent;
 import com.jdriven.workshop.axon.event.ProductRemovedEvent;
 import com.jdriven.workshop.axon.event.ShoppingCartCreatedEvent;
+
+
+import org.axonframework.eventhandling.AnnotationEventListenerAdapter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import static org.axonframework.eventhandling.GenericEventMessage.asEventMessage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -23,10 +27,11 @@ public class ShoppingCartProjectionTest {
 
     @Captor
     ArgumentCaptor<ShoppingCart> shoppingCartCaptor;
+
     @Mock
     private ShoppingCartRepository shoppingCartRepository;
-    @InjectMocks
-    private ShoppingCartProjection shoppingCartProjection;
+
+    private AnnotationEventListenerAdapter shoppingCartProjection;
 
     @Before
     public void setup() {
@@ -34,11 +39,12 @@ public class ShoppingCartProjectionTest {
         shoppingCart.getItems().add(new ShoppingCartItem(shoppingCart, "productId", "productName", 3, BigDecimal.valueOf(25.00)));
 
         when(shoppingCartRepository.findById("cartId")).thenReturn(Optional.of(shoppingCart));
+        shoppingCartProjection = new AnnotationEventListenerAdapter(new ShoppingCartProjection(shoppingCartRepository));
     }
 
     @Test
-    public void testSavesCartOnCartCreatedEvent() {
-        shoppingCartProjection.on(new ShoppingCartCreatedEvent("cartId"));
+    public void testSavesCartOnCartCreatedEvent() throws Exception {
+        shoppingCartProjection.handle(asEventMessage(new ShoppingCartCreatedEvent("cartId")));
 
         Mockito.verify(shoppingCartRepository).save(shoppingCartCaptor.capture());
         ShoppingCart cart = shoppingCartCaptor.getValue();
@@ -46,8 +52,8 @@ public class ShoppingCartProjectionTest {
     }
 
     @Test
-    public void testAddsProducts() {
-        shoppingCartProjection.on(new ProductAddedEvent("cartId", new Product("productId", "productName"), 3, 2500));
+    public void testAddsProducts() throws Exception {
+        shoppingCartProjection.handle(asEventMessage(new ProductAddedEvent("cartId", new Product("productId", "productName"), 3, 2500)));
 
         Mockito.verify(shoppingCartRepository).save(shoppingCartCaptor.capture());
         ShoppingCart cart = shoppingCartCaptor.getValue();
@@ -58,8 +64,8 @@ public class ShoppingCartProjectionTest {
     }
 
     @Test
-    public void testRemoveProducts() {
-        shoppingCartProjection.on(new ProductRemovedEvent("cartId", "productId", 3));
+    public void testRemoveProducts() throws Exception {
+        shoppingCartProjection.handle(asEventMessage(new ProductRemovedEvent("cartId", "productId", 3)));
 
         Mockito.verify(shoppingCartRepository).save(shoppingCartCaptor.capture());
         ShoppingCart cart = shoppingCartCaptor.getValue();
@@ -68,8 +74,8 @@ public class ShoppingCartProjectionTest {
     }
 
     @Test
-    public void removesCartOnCheckoutCompleted() {
-        shoppingCartProjection.on(new CheckoutCompletedEvent("cartId"));
+    public void removesCartOnCheckoutCompleted() throws Exception {
+        shoppingCartProjection.handle(asEventMessage(new CheckoutCompletedEvent("cartId")));
 
         Mockito.verify(shoppingCartRepository).deleteById("cartId");
     }
