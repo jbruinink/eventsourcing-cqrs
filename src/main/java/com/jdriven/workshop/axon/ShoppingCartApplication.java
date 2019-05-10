@@ -1,8 +1,11 @@
 package com.jdriven.workshop.axon;
 
+import org.axonframework.commandhandling.SimpleCommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventsourcing.EventSourcingRepository;
 import org.axonframework.eventsourcing.eventstore.EventStore;
+import org.axonframework.messaging.interceptors.BeanValidationInterceptor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
