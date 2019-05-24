@@ -1,7 +1,6 @@
 package com.jdriven.workshop.axon.event;
 
 import com.jdriven.workshop.axon.domain.Product;
-
 import lombok.Value;
 
 @Value

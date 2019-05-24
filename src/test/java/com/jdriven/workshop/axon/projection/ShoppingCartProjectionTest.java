@@ -1,6 +1,7 @@
 package com.jdriven.workshop.axon.projection;
 
 import com.jdriven.workshop.axon.domain.Product;
+import com.jdriven.workshop.axon.domain.ShoppingCartStatus;
 import com.jdriven.workshop.axon.event.CheckoutCompletedEvent;
 import com.jdriven.workshop.axon.event.ProductAddedEvent;
 import com.jdriven.workshop.axon.event.ProductRemovedEvent;
@@ -35,7 +36,7 @@ public class ShoppingCartProjectionTest {
 
     @Before
     public void setup() {
-        ShoppingCart shoppingCart = new ShoppingCart("cartId");
+        ShoppingCart shoppingCart = new ShoppingCart("cartId", ShoppingCartStatus.SHOPPING);
         shoppingCart.getItems().add(new ShoppingCartItem(shoppingCart, "productId", "productName", 3, BigDecimal.valueOf(25.00)));
 
         when(shoppingCartRepository.findById("cartId")).thenReturn(Optional.of(shoppingCart));
@@ -74,9 +75,12 @@ public class ShoppingCartProjectionTest {
     }
 
     @Test
-    public void removesCartOnCheckoutCompleted() throws Exception {
+    public void statusIsCompletedOnCheckoutCompleted() throws Exception {
         shoppingCartProjection.handle(asEventMessage(new CheckoutCompletedEvent("cartId")));
 
-        Mockito.verify(shoppingCartRepository).deleteById("cartId");
+        Mockito.verify(shoppingCartRepository).save(shoppingCartCaptor.capture());
+        ShoppingCart cart = shoppingCartCaptor.getValue();
+        assertEquals("cartId", cart.getId());
+        assertEquals(ShoppingCartStatus.CHECKOUT_COMPLETED, cart.getStatus());
     }
 }

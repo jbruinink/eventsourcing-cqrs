@@ -1,19 +1,23 @@
 package com.jdriven.workshop.axon.projection;
 
-import java.math.BigDecimal;
-import java.util.Iterator;
-
+import com.jdriven.workshop.axon.domain.ShoppingCartStatus;
+import com.jdriven.workshop.axon.event.CheckoutCompletedEvent;
+import com.jdriven.workshop.axon.event.ProductAddedEvent;
+import com.jdriven.workshop.axon.event.ProductRemovedEvent;
+import com.jdriven.workshop.axon.event.ShoppingCartAcceptedEvent;
+import com.jdriven.workshop.axon.event.ShoppingCartCreatedEvent;
+import com.jdriven.workshop.axon.event.ShoppingCartRejectedEvent;
+import com.jdriven.workshop.axon.query.ShoppingCartQuery;
+import com.jdriven.workshop.axon.query.ShoppingCartResponse;
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.stereotype.Component;
 
-
-import com.jdriven.workshop.axon.event.CheckoutCompletedEvent;
-import com.jdriven.workshop.axon.event.ProductAddedEvent;
-import com.jdriven.workshop.axon.event.ProductRemovedEvent;
-import com.jdriven.workshop.axon.event.ShoppingCartCreatedEvent;
-import com.jdriven.workshop.axon.query.ShoppingCartQuery;
-import com.jdriven.workshop.axon.query.ShoppingCartResponse;
+import javax.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Objects;
 
 @Component
 public class ShoppingCartProjection {
@@ -27,7 +31,7 @@ public class ShoppingCartProjection {
 
     @EventHandler
     public void on(ShoppingCartCreatedEvent event) {
-        repository.save(new ShoppingCart(event.getId()));
+        repository.save(new ShoppingCart(event.getId(), ShoppingCartStatus.SHOPPING));
     }
 
     @EventHandler
@@ -79,11 +83,36 @@ public class ShoppingCartProjection {
 
     @EventHandler
     public void on(CheckoutCompletedEvent event) {
-        repository.deleteById(event.getCartId());
+        repository.findById(event.getCartId()).ifPresent(cart -> {
+            cart.setStatus(ShoppingCartStatus.CHECKOUT_COMPLETED);
+            repository.save(cart);
+        });
+    }
+
+    @EventHandler
+    public void on(ShoppingCartAcceptedEvent event) {
+        repository.findById(event.getCartId()).ifPresent(cart -> {
+            cart.setStatus(ShoppingCartStatus.ACCEPTED);
+            repository.save(cart);
+        });
+    }
+
+    @EventHandler
+    public void on(ShoppingCartRejectedEvent event) {
+        repository.findById(event.getCartId()).ifPresent(cart -> {
+            cart.setStatus(ShoppingCartStatus.REJECTED);
+            repository.save(cart);
+        });
     }
 
     @QueryHandler
     public ShoppingCartResponse getShoppingCarts(ShoppingCartQuery query) {
-        return new ShoppingCartResponse(repository.findByProductId(query.getProductId()));
+        if (Objects.nonNull(query.getProductId())) {
+            return new ShoppingCartResponse(repository.findByProductId(query.getProductId()));
+        } else {
+            return repository.findById(query.getCartId())
+                    .map(cart -> new ShoppingCartResponse(Collections.singletonList(cart)))
+                    .orElseThrow(() -> new EntityNotFoundException(query.getCartId()));
+        }
     }
 }

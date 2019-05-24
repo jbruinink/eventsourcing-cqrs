@@ -1,12 +1,10 @@
 package com.jdriven.workshop.axon.command;
 
-import javax.validation.constraints.Positive;
-
+import com.jdriven.workshop.axon.domain.Product;
 import lombok.Value;
 import org.axonframework.commandhandling.TargetAggregateIdentifier;
 
-
-import com.jdriven.workshop.axon.domain.Product;
+import javax.validation.constraints.Positive;
 
 @Value
 public class AddProductCommand {

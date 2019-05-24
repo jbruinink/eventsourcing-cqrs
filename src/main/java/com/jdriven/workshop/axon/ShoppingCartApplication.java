@@ -1,5 +1,11 @@
 package com.jdriven.workshop.axon;
 
+import com.jdriven.workshop.axon.aggregate.ShoppingCartAggregate;
+import com.jdriven.workshop.axon.command.AddProductCommand;
+import com.jdriven.workshop.axon.command.CompleteCheckoutCommand;
+import com.jdriven.workshop.axon.command.CreateShoppingCartCommand;
+import com.jdriven.workshop.axon.command.RemoveProductCommand;
+import com.jdriven.workshop.axon.domain.Product;
 import org.axonframework.commandhandling.CommandCallback;
 import org.axonframework.commandhandling.CommandMessage;
 import org.axonframework.commandhandling.gateway.CommandGateway;
@@ -13,12 +19,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import com.jdriven.workshop.axon.aggregate.ShoppingCartAggregate;
-import com.jdriven.workshop.axon.command.AddProductCommand;
-import com.jdriven.workshop.axon.command.CompleteCheckoutCommand;
-import com.jdriven.workshop.axon.command.CreateShoppingCartCommand;
-import com.jdriven.workshop.axon.command.RemoveProductCommand;
-import com.jdriven.workshop.axon.domain.Product;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 @SpringBootApplication
 public class ShoppingCartApplication implements CommandLineRunner {
@@ -41,6 +43,11 @@ public class ShoppingCartApplication implements CommandLineRunner {
     @Bean
     public QueryGateway queryGateway(QueryBus queryBus) {
         return new DefaultQueryGateway(queryBus);
+    }
+
+    @Bean
+    public Supplier<String> payProductsIdSupplier() {
+        return () -> UUID.randomUUID().toString();
     }
 
     @Override

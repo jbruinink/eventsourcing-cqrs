@@ -1,16 +1,5 @@
 package com.jdriven.workshop.axon.aggregate;
 
-import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.axonframework.commandhandling.CommandHandler;
-import org.axonframework.commandhandling.model.AggregateIdentifier;
-import org.axonframework.eventsourcing.EventSourcingHandler;
-import org.axonframework.spring.stereotype.Aggregate;
-
-
 import com.jdriven.workshop.axon.command.AcceptShoppingCartCommand;
 import com.jdriven.workshop.axon.command.AddProductCommand;
 import com.jdriven.workshop.axon.command.CompleteCheckoutCommand;
@@ -19,17 +8,29 @@ import com.jdriven.workshop.axon.command.RejectShoppingCartCommand;
 import com.jdriven.workshop.axon.command.RemoveProductCommand;
 import com.jdriven.workshop.axon.domain.CartValueTooLowException;
 import com.jdriven.workshop.axon.domain.ShoppingCartProduct;
+import com.jdriven.workshop.axon.domain.ShoppingCartStatus;
 import com.jdriven.workshop.axon.event.CheckoutCompletedEvent;
 import com.jdriven.workshop.axon.event.ProductAddedEvent;
 import com.jdriven.workshop.axon.event.ProductRemovedEvent;
 import com.jdriven.workshop.axon.event.ShoppingCartAcceptedEvent;
 import com.jdriven.workshop.axon.event.ShoppingCartCreatedEvent;
 import com.jdriven.workshop.axon.event.ShoppingCartRejectedEvent;
+import org.axonframework.commandhandling.CommandHandler;
+import org.axonframework.commandhandling.model.AggregateIdentifier;
+import org.axonframework.eventsourcing.EventSourcingHandler;
+import org.axonframework.spring.stereotype.Aggregate;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.axonframework.commandhandling.model.AggregateLifecycle.apply;
 
 @Aggregate
 public class ShoppingCartAggregate {
     @AggregateIdentifier
     private String id;
+
+    private ShoppingCartStatus status;
 
     private Map<String, ShoppingCartProduct> products;
 
@@ -102,16 +103,16 @@ public class ShoppingCartAggregate {
 
     @EventSourcingHandler
     public void on(CheckoutCompletedEvent event) {
-        products.clear();
+        status = ShoppingCartStatus.CHECKOUT_COMPLETED;
     }
 
     @EventSourcingHandler
     public void on(ShoppingCartRejectedEvent evt) {
-        // Do something
+        status = ShoppingCartStatus.REJECTED;
     }
 
     @EventSourcingHandler
     public void on(ShoppingCartAcceptedEvent evt) {
-        // Do something
+        status = ShoppingCartStatus.ACCEPTED;
     }
 }

@@ -1,10 +1,7 @@
 package com.jdriven.workshop.axon.fulfillment;
 
-import com.jdriven.workshop.axon.payment.PayProductsReply;
-import com.jdriven.workshop.axon.payment.PayProductsRequest;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventhandling.EventBus;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Random;
@@ -16,7 +13,7 @@ public class FulfillmentRequestHandler {
 
     private final EventBus eventBus;
 
-    public FulfillmentRequestHandler(@Qualifier("sagaEventBus") EventBus eventBus) {
+    public FulfillmentRequestHandler(EventBus eventBus) {
         this.eventBus = eventBus;
     }
 
