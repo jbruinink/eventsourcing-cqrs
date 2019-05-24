@@ -29,7 +29,7 @@ public class CommandHandlingExerciseTest {
 
     /**
      * In this exercise, implement a {@link org.axonframework.commandhandling.CommandHandler} for the
-     * {@link CreateShoppingCartCommand} in the {@link ShoppingCartAggregate} that applies a {@link ShoppinCartCreatedEvent}
+     * {@link CreateShoppingCartCommand} in the {@link ShoppingCartAggregate} that applies a {@link ShoppingCartCreatedEvent}
      */
     @Test
     public void testCreatesShoppingCart() {
@@ -86,7 +86,7 @@ public class CommandHandlingExerciseTest {
         fixture
                 .given(
                         new ShoppingCartCreatedEvent(cartId),
-                        new ProductAddedEvent(cartId, testProduct, 3, 300),
+                        new ProductAddedEvent(cartId, testProduct, 13, 300),
                         new ProductRemovedEvent(cartId, productId, 2))
                 .when(new CompleteCheckoutCommand(cartId))
                 .expectEvents(new CheckoutCompletedEvent(cartId));

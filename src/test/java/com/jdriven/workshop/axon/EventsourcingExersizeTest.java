@@ -5,6 +5,7 @@ import org.axonframework.eventsourcing.EventSourcingRepository;
 import org.axonframework.messaging.unitofwork.DefaultUnitOfWork;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import com.jdriven.workshop.axon.event.ShoppingCartCreatedEvent;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
+@Ignore
 public class EventsourcingExersizeTest {
 
     @Autowired
